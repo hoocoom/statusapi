@@ -1,0 +1,118 @@
+﻿@using Status.Web.Helpers
+@model  Status.Web.Areas.Admin.Models.StatusChangeModel<Status.Web.Areas.Admin.Models.StatusChangeViewModel>
+@{
+    ViewBag.Title = "Главная";
+}
+
+<h2>&nbsp;</h2>
+
+<div class="panel panel-@Model.GetCss()">
+    <div class="panel-heading">
+        <h3 class="panel-title">Текущий статус</h3>
+    </div>
+    <div class="panel-body">
+        <p>@Model.GetDescription()</p>
+    </div>
+</div>
+
+<div class="panel panel-default">
+    <div class="panel-heading">
+        <h3 class="panel-title">Смена статуса</h3>
+    </div>
+    <div class="panel-body">
+        @using (Html.BeginForm(null, null, FormMethod.Post, new { @class = "form-horizontal" }))
+        {
+            @Html.EditorFor(x => x)
+
+            <div class="form-group">
+                <div class="col-sm-offset-3 col-sm-9">
+                    <button type="submit" class="btn btn-default">Сменить статус</button>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+<div class="panel panel-default">
+    <div class="panel-heading">
+        <h3 class="panel-title">История</h3>
+    </div>
+    <div class="panel-body">
+
+        <div class="table-responsive">
+            <table class="table table-striped">
+                <thead>
+                <tr>
+                    <th>Статус</th>
+                    <th>Дата запланированных работ</th>
+                    <th>Описание ситуации</th>
+                    <th>Время</th>
+                </tr>
+                </thead>
+
+                <tbody>
+                @foreach (var entry in Model.ViewData.StatusHistory)
+                {
+                    <tr class="@entry.GetCss()">
+                        <td>@entry.State.GetShortDescription()</td>
+                        <td>@entry.MaintenancePlannedDate</td>
+                        <td>@entry.Description</td>
+                        <td>@entry.CreateDate.ToString("s")</td>
+                    </tr>
+                }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+@section scripts {
+    <script>
+        $(function() {
+            $('.datepicker').datepicker(
+                {
+                    language: 'ru',
+                    format: 'dd-mm-yyyy',
+                    startDate: '+1d',
+                    autoclose: true
+                }
+            );
+
+            var setVisibility = function(state) {
+                if (state == 'MaintenancePlanned')
+                    $('#plannedDate').show();
+                else
+                    $('#plannedDate').hide();
+            }
+
+            var currentState = $('#State').val();
+
+            setVisibility(currentState);
+
+            $('#State').change(function(elem) {
+                setVisibility(elem.target.value);
+            });
+            
+            $('#MaintenancePlannedDate').change(function() {
+                $('#plannedDate').removeClass('has-error');
+                $('#plannedDate-warning').addClass('hidden');
+            });
+
+            $('form').submit(function() {
+                var submittedState = $('#State').val();
+                var date = $('#MaintenancePlannedDate');
+
+                if (submittedState == 'MaintenancePlanned' && !date.val()) {
+                    $('#plannedDate').toggleClass('has-error');
+                    $('#plannedDate-warning').toggleClass('hidden');
+
+                    return false;
+                }
+
+                if (submittedState != 'MaintenancePlanned' && date.val()) {
+                    date.val('');
+                }
+            });
+        });
+    </script>
+}

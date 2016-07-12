@@ -1,0 +1,40 @@
+﻿@using Status.Core.Entities.Domain
+@using Status.Web.Helpers
+@model Status.Web.Areas.Admin.Models.StatusChangeModel
+
+@{
+    var states = (from State e in Enum.GetValues(typeof(State))
+                  select new SelectListItem
+                  {
+                      Value = e.ToString("G"),
+                      Text = e.GetShortDescription(),
+                      Disabled = e == Model.State && Model.State != State.MaintenancePlanned
+                  }).ToList();
+
+    Model.State = (State)Enum.Parse(typeof(State), states.First(x => x.Value != Model.State.ToString("G")).Value);
+    Model.MaintenancePlannedDate = null;
+}
+
+<div class="form-group">
+    @Html.LabelFor(x => x.State, "Статус сервиса", new { @class = "control-label col-sm-3" })
+    <div class="col-sm-4">
+        @Html.DropDownListFor(x => x.State, new List<SelectListItem>(states), new { @class = "form-control" })
+    </div>
+</div>
+
+<div class="form-group" id="plannedDate">
+    @Html.LabelFor(x => x.MaintenancePlannedDate, "Дата планируемых работ", new { @class = "control-label col-sm-3" })
+
+    <div class="col-sm-4">
+        @Html.TextBoxFor(x => x.MaintenancePlannedDate, new {@class = "form-control datepicker"})
+        @Html.LabelFor(x => x.MaintenancePlannedDate, "Необходимо указать дату работ", new {@class = "control-label hidden", id = "plannedDate-warning" } )
+    </div>
+</div>
+
+
+<div class="form-group">
+    @Html.LabelFor(x => x.Description, "Описание работ", new { @class = "control-label col-sm-3" })
+    <div class="col-sm-9">
+        @Html.TextBoxFor(x => x.Description, new { @class = "form-control" })
+    </div>
+</div>

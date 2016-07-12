@@ -1,0 +1,5 @@
+bin
+obj
+/Status.Core/obj
+packages
+*.suo
